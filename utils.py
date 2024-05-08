@@ -82,13 +82,14 @@ def find_closest_words(matrix, vector, iidx, n, sim_metric='cos'):
 
     return closest_words
 
-def get_accuracy_scores(target_matrix, aligned_matrix, target_indices, aligned_indices, target_iidx, n):
+def get_accuracy_scores(target_matrix, aligned_matrix, target_indices, aligned_indices, target_iidx, n, verbose=False):
     correct = 0
     for index, item in enumerate(aligned_indices):
         aligned_vector = aligned_matrix[item]
         closest_words = find_closest_words(target_matrix, aligned_vector, target_iidx, n)
         gold_word = target_iidx[target_indices[index]]
-        # print(gold_word, closest_words)
+        if verbose:
+            print(gold_word, closest_words)
         if gold_word in closest_words:
             correct += 1
     return correct / len(target_indices), len(target_indices)

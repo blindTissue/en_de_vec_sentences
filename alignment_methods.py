@@ -237,6 +237,49 @@ def weighted_lr(A, B, A_test, B_test, weights_train, weights_test):
 
     return model
 
+def weighted_lr_train_only(A, B, weights):
+    # Data
+    X = torch.tensor(A, dtype=torch.float32)
+    Y = torch.tensor(B, dtype=torch.float32)
+    weights = torch.tensor(weights, dtype=torch.float32).view(-1, 1)
+
+    # Model
+    model = nn.Linear(X.shape[1], Y.shape[1], bias=False)
+    # Loss Function
+    def weighted_mse_loss(input, target, weight):
+        return torch.sum(weight * (input - target) ** 2)
+
+    # Optimizer
+    optimizer = optim.SGD(model.parameters(), lr=0.001)
+    patience = 500
+    best_loss = np.inf
+    epochs_no_improve = 0
+
+    # Training loop
+    for epoch in range(100000):
+        model.train()
+        optimizer.zero_grad()
+
+        # Forward pass
+        predictions = model(X)
+
+        # Compute weighted loss
+        loss = weighted_mse_loss(predictions, Y, weights)
+
+        # Backward pass
+        loss.backward()
+        optimizer.step()
+
+        if loss < best_loss:
+            best_loss = loss
+            epochs_no_improve = 0
+        else:
+            epochs_no_improve += 1
+            if epochs_no_improve == patience:
+                break
+
+    return model
+
 # returns the words and indicies given a dataset from train_test_data
 def create_words_and_indices(data):
     english_words = []
